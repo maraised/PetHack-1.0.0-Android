@@ -147,7 +147,11 @@ static const struct trobj Samurai[] = {
     { SPLINT_MAIL, 0, ARMOR_CLASS, 1, 1, UNDEF_BLESS },
     { 0, 0, 0, 0, 0, 0 }
 };
-static const struct trobj Tourist[] = {
+static const struct trobj Tourist[] = { 
+/* CHANGED 6/22/2026: Tourists now also spawn with a blessed magic whistle,
+3-5 extra tripe rations, 3-5 blessed scrolls of taming,
+a blessed spellbook of charm monster, a sack, a random blessed figurine,
+and a leash */
     { DART, 2, WEAPON_CLASS, 21, 40, UNDEF_BLESS },
     { UNDEF_TYP, UNDEF_SPE, FOOD_CLASS, 10, 10, 0 },
     { POT_EXTRA_HEALING, 0, POTION_CLASS, 2, 2, UNDEF_BLESS },
@@ -155,6 +159,13 @@ static const struct trobj Tourist[] = {
     { HAWAIIAN_SHIRT, 0, ARMOR_CLASS, 1, 1, UNDEF_BLESS },
     { EXPENSIVE_CAMERA, UNDEF_SPE, TOOL_CLASS, 1, 1, 0 },
     { CREDIT_CARD, 0, TOOL_CLASS, 1, 1, 0 },
+    { MAGIC_WHISTLE, 0, TOOL_CLASS, 1, 1, UNDEF_BLESS },
+    { TRIPE_RATION, 0, FOOD_CLASS, 3, 5, 0 },
+    { SCR_TAMING, 0, SCROLL_CLASS, 3, 5, UNDEF_BLESS },
+    { SPE_CHARM_MONSTER, 0, SPBOOK_CLASS, 1, 1, UNDEF_BLESS },
+    { SACK, 0, TOOL_CLASS, 1, 1, 0 },
+    { FIGURINE, 0, TOOL_CLASS, 1, 1, UNDEF_BLESS },
+    { LEASH, 0, TOOL_CLASS, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0 }
 };
 static const struct trobj Valkyrie[] = {
@@ -515,7 +526,7 @@ static const struct def_skill Skill_T[] = {
     { P_WHIP, P_BASIC },
     { P_UNICORN_HORN, P_SKILLED },
     { P_DIVINATION_SPELL, P_BASIC },
-    { P_ENCHANTMENT_SPELL, P_BASIC },
+    { P_ENCHANTMENT_SPELL, P_EXPERT },
     { P_ESCAPE_SPELL, P_SKILLED },
     { P_RIDING, P_BASIC },
     { P_TWO_WEAPON_COMBAT, P_SKILLED },
@@ -1219,8 +1230,30 @@ ini_inv_adjust_obj(const struct trobj *trop, struct obj *obj)
         if (Is_container(obj) || obj->otyp == STATUE) {
             obj->cknown = obj->lknown = 1;
             obj->otrapped = 0;
+} else {
+        /* CHANGED 6/24/2026: Figurine they spawn with is completely random */
+        if (Role_if(PM_TOURIST)) {
+            if (obj->otyp == MAGIC_WHISTLE ||
+                obj->otyp == SCR_TAMING ||
+                obj->otyp == SPE_CHARM_MONSTER ||
+                obj->otyp == FIGURINE) {
+
+                obj->blessed = 1;
+                obj->cursed = 0;
+            }
+	    /*Figurine needs to be completely random while still following normal figurine constraints*/
+            if (obj->otyp == FIGURINE) {
+            int mndx;
+            do {
+                mndx = rn1(NUMMONS - 1, 1);
+            } while ((mons[mndx].geno & G_UNIQ) ||                              // No Unique bosses
+                     (mons[mndx].mlet == S_HUMAN && !is_undead(&mons[mndx]))); // No non-undead humans
+
+            obj->corpsenm = mndx;
         }
+   }
         obj->cursed = 0;
+
         if (obj->opoisoned && u.ualign.type != A_CHAOTIC)
             obj->opoisoned = 0;
         if (obj->oclass == WEAPON_CLASS || obj->oclass == TOOL_CLASS) {
@@ -1244,6 +1277,7 @@ ini_inv_adjust_obj(const struct trobj *trop, struct obj *obj)
             obj->blessed = trop->trbless;
 
     }
+}
     /* defined after setting otyp+quan + blessedness */
     obj->owt = weight(obj);
     return stop;
@@ -1313,6 +1347,10 @@ ini_inv(const struct trobj *trop)
         otyp = (int) trop->trotyp;
         if (otyp != UNDEF_TYP) {
             obj = mksobj(otyp, TRUE, FALSE);
+	/* NEW: Force random monster for figurines */
+        if (obj->otyp == FIGURINE) {
+            obj->corpsenm = rndmonnum();
+            }
         } else { /* UNDEF_TYP */
             obj = ini_inv_mkobj_filter(trop->trclass, got_sp1);
             otyp = obj->otyp;

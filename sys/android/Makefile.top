@@ -121,8 +121,8 @@ DAT = $(DATNODLB) $(DATDLB)
 
 RECOVERBIN = recover
 
-NDK = /path/to/android-ndk-r21e
-NDK_TOOLCHAIN=${NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin
+NDK = /mnt/c/Users/reryd/AppData/Local/Android/Sdk/ndk/30.0.14904198
+NDK_TOOLCHAIN=${NDK}/toolchains/llvm/prebuilt/windows-x86_64/bin
 
 # Choose an ABI
 ABI = armeabi
@@ -133,15 +133,15 @@ ABI = armeabi
 
 API = 30
 
-CC_armeabi     = $(NDK_TOOLCHAIN)/armv7a-linux-androideabi$(API)-clang
+CC_armeabi     = $(NDK_TOOLCHAIN)/clang.exe -Wno-c++-compat --target=armv7a-linux-androideabi$(API)
 LD_armeabi     = $(NDK_TOOLCHAIN)/arm-linux-androideabi-ld
-CC_armeabi-v7a = $(NDK_TOOLCHAIN)/armv7a-linux-androideabi$(API)-clang
+CC_armeabi-v7a = $(NDK_TOOLCHAIN)/clang.exe -Wno-c++-compat --target=armv7a-linux-androideabi$(API)
 LD_armeabi-v7a = $(NDK_TOOLCHAIN)/arm-linux-androideabi-ld
-CC_arm64-v8a   = $(NDK_TOOLCHAIN)/aarch64-linux-android$(API)-clang
+CC_arm64-v8a = $(NDK_TOOLCHAIN)/clang.exe -Wno-c++-compat --target=aarch64-linux-android$(API)
 LD_arm64-v8a   = $(NDK_TOOLCHAIN)/aarch64-linux-android-ld
-CC_x86         = $(NDK_TOOLCHAIN)/i686-linux-android$(API)-clang
+CC_x86 = $(NDK_TOOLCHAIN)/clang.exe -Wno-c++-compat --target=i686-linux-android$(API)
 LD_x86         = $(NDK_TOOLCHAIN)/i686-linux-android-ld
-CC_x86_64      = $(NDK_TOOLCHAIN)/x86_64-linux-android$(API)-clang
+CC_x86 = $(NDK_TOOLCHAIN)/clang.exe -Wno-c++-compat --target=i686-linux-android$(API)
 LD_x86_64      = $(NDK_TOOLCHAIN)/x86_64-linux-android-ld
 
 CC_VAR = CC_$(ABI)

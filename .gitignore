@@ -98,3 +98,10 @@ util/*.lib
 util/*.exp
 submodules/CHKSUMS.tmp
 sys/amiga/regex/
+
+.gradle/
+.idea/
+build/
+local.properties
+.DS_Store
+*.iml

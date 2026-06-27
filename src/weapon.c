@@ -1768,6 +1768,9 @@ skill_init(const struct def_skill *class_skill)
     } else if (Role_if(PM_WIZARD)) {
         P_SKILL(P_ATTACK_SPELL) = P_BASIC;
         P_SKILL(P_ENCHANTMENT_SPELL) = P_BASIC;
+/* CHANGED 6/22/2026: Tourists start with basic in enchantment spells and can become expert */
+    } else if (Role_if(PM_TOURIST)) {
+        P_SKILL(P_ENCHANTMENT_SPELL) = P_BASIC;
     }
 
     /* walk through array to set skill maximums */

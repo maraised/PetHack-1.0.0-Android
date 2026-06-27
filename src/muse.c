@@ -13,7 +13,6 @@
  * monsters cannot recognize if items are cursed are not, monsters which
  * are confused don't know not to read scrolls, etc....
  */
-
 staticfn int precheck(struct monst *, struct obj *);
 staticfn void mzapwand(struct monst *, struct obj *, boolean) NONNULLPTRS;
 staticfn void mplayhorn(struct monst *, struct obj *, boolean) NONNULLPTRS;
@@ -545,14 +544,47 @@ find_defensive(struct monst *mtmp, boolean tryescape)
         if (mtmp->mhp >= mtmp->mhpmax
             || (mtmp->mhp >= 10 && mtmp->mhp * fraction >= mtmp->mhpmax))
             return FALSE;
-
-        if (mtmp->mpeaceful) {
-            if (!nohands(mtmp->data)) {
-                if (m_use_healing(mtmp))
-                    return TRUE;
-            }
+	{
+            
+            /* CHANGED 6/23/2026: If healthy but tame, don't drop/ignore health potions.
+	    Also ensure other useful potions aren't ignored; not sure if this changed anything */
+            if (mtmp->mtame) return TRUE; 
+            
             return FALSE;
         }
+
+    if (mtmp->mtame) {
+        if (!nohands(mtmp->data)) {
+            if (m_use_healing(mtmp))
+                return TRUE;
+
+            struct obj *obj;
+            for (obj = mtmp->minvent; obj; obj = obj->nobj) {
+                if (obj->oclass == POTION_CLASS) {
+
+                    if (obj->otyp == POT_SPEED && !(mtmp->permspeed & MFAST || mtmp->mspeed == MFAST)) {
+                        gm.m.misc = obj;
+                        gm.m.has_misc = 1;
+                        return TRUE;
+                    }
+                    if (obj->otyp == POT_GAIN_LEVEL) {
+                        gm.m.misc = obj;
+                        gm.m.has_misc = 1;
+                        return TRUE;
+                    }
+                }
+            }
+        }
+        return FALSE; 
+    }
+
+    if (mtmp->mpeaceful) {
+        if (!nohands(mtmp->data)) {
+            if (m_use_healing(mtmp))
+                return TRUE;
+        }
+        return FALSE;
+    }
     }
 
     if (stuck || immobile || mtmp->mtrapped) {
@@ -1436,10 +1468,11 @@ find_offensive(struct monst *mtmp)
         && !uwep && !uarmu && !uarm && !uarmh
         && !uarms && !uarmg && !uarmc && !uarmf)
         return FALSE;
-    /* all offensive items require orthogonal or diagonal targeting */
-    if (!lined_up(mtmp))
-        return FALSE;
+    
+        if (!lined_up(mtmp))
+            return FALSE;
 
+        
 #define nomore(x)       if (gm.m.has_offense == x) continue;
     reflection_skip = (m_seenres(mtmp, M_SEEN_REFL) != 0
                        || monnear(mtmp, mtmp->mux, mtmp->muy));

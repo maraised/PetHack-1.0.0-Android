@@ -128,6 +128,15 @@ droppables(struct monst *mon)
             break;
         }
 
+        /* CHANGED 6/24/2026: Intelligent pets now hoard healing potions */
+        if (mon->mtame && !is_animal(mon->data) && !mindless(mon->data)) {
+            if (obj->oclass == POTION_CLASS && 
+               (obj->otyp == POT_HEALING || obj->otyp == POT_EXTRA_HEALING || obj->otyp == POT_FULL_HEALING)) {
+                continue;
+            }
+
+        }
+
         if (!obj->owornmask && obj != wep)
             return obj;
     }
@@ -1268,11 +1277,7 @@ dog_move(
 
     /* Pet hasn't attacked anything but is considering moving -
      * now's the time for ranged attacks. Note that the pet can move
-     * after it performs its ranged attack. Should this be changed?
-     */
-    if ((i = pet_ranged_attk(mtmp, FALSE)) != MMOVE_NOTHING)
-        return i;
-
+     * after it performs its ranged attack. Should this be changed? */
  newdogpos:
     if (nix != omx || niy != omy) {
         boolean wasseen;

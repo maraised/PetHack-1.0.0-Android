@@ -105,7 +105,7 @@ SYSOBJ ?= $(TARGETPFX)ioctl.o $(TARGETPFX)androidmain.o $(TARGETPFX)unixtty.o \
 # The gcc compiler switch for accepting C99 code. Because gcc had extensions in
 # earlier versions, a number of C99 features were already compiling cleanly, but
 # not all (e.g., 'for' loop initial declarations).
-CSTD = -std=c99
+CSTD =
 
 # if you're debugging and want gcc to check as much as possible, use:
 # CC = gcc -W -Wimplicit -Wreturn-type -Wunused -Wformat -Wswitch -Wshadow -Wcast-qual -Wwrite-strings
@@ -196,35 +196,53 @@ CSTD = -std=c99
 #LFLAGS =
 
 
-NDK = /path/to/android-ndk-r21e
-NDK_TOOLCHAIN=${NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin
+NDK=/mnt/c/Users/reryd/AppData/Local/Android/Sdk/ndk/30.0.14904198
+NDK_TOOLCHAIN=${NDK}/toolchains/llvm/prebuilt/windows-x86_64/bin
 
 # Choose an ABI
-ABI = armeabi
+#ABI = armeabi
 #ABI = armeabi-v7a
-#ABI = arm64-v8a
+ABI = arm64-v8a
 #ABI = x86
 #ABI = x86_64
 
 API = 30
 
 CC_armeabi     = $(NDK_TOOLCHAIN)/armv7a-linux-androideabi$(API)-clang
-LD_armeabi     = $(NDK_TOOLCHAIN)/arm-linux-androideabi-ld
+LD_armeabi     = $(NDK_TOOLCHAIN)/ld.exe
+AR_armeabi     = $(NDK_TOOLCHAIN)/llvm-ar.exe
+RANLIB_armeabi = $(NDK_TOOLCHAIN)/llvm-ranlib.exe
+
 CC_armeabi-v7a = $(NDK_TOOLCHAIN)/armv7a-linux-androideabi$(API)-clang
-LD_armeabi-v7a = $(NDK_TOOLCHAIN)/arm-linux-androideabi-ld
+LD_armeabi-v7a = $(NDK_TOOLCHAIN)/ld.exe
+AR_armeabi-v7a = $(NDK_TOOLCHAIN)/llvm-ar.exe
+RANLIB_armeabi-v7a = $(NDK_TOOLCHAIN)/llvm-ranlib.exe
+
 CC_arm64-v8a   = $(NDK_TOOLCHAIN)/aarch64-linux-android$(API)-clang
-LD_arm64-v8a   = $(NDK_TOOLCHAIN)/aarch64-linux-android-ld
+LD_arm64-v8a   = $(NDK_TOOLCHAIN)/ld.exe
+AR_arm64-v8a   = $(NDK_TOOLCHAIN)/llvm-ar.exe
+RANLIB_arm64-v8a = $(NDK_TOOLCHAIN)/llvm-ranlib.exe
+
 CC_x86         = $(NDK_TOOLCHAIN)/i686-linux-android$(API)-clang
-LD_x86         = $(NDK_TOOLCHAIN)/i686-linux-android-ld
+LD_x86         = $(NDK_TOOLCHAIN)/ld.exe
+AR_x86         = $(NDK_TOOLCHAIN)/llvm-ar.exe
+RANLIB_x86     = $(NDK_TOOLCHAIN)/llvm-ranlib.exe
+
 CC_x86_64      = $(NDK_TOOLCHAIN)/x86_64-linux-android$(API)-clang
-LD_x86_64      = $(NDK_TOOLCHAIN)/x86_64-linux-android-ld
+LD_x86_64      = $(NDK_TOOLCHAIN)/ld.exe
+AR_x86_64      = $(NDK_TOOLCHAIN)/llvm-ar.exe
+RANLIB_x86_64  = $(NDK_TOOLCHAIN)/llvm-ranlib.exe
 
 CC_VAR = CC_$(ABI)
 LD_VAR = LD_$(ABI)
+AR_VAR = AR_$(ABI)
+RANLIB_VAR = RANLIB_$(ABI)
 
 TARGET_CC   := $($(CC_VAR))
 TARGET_CXX   := $(TARGET_CC)++
 TARGET_LINK := $(TARGET_CC)
+TARGET_AR   := $($(AR_VAR))
+TARGET_RANLIB := $($(RANLIB_VAR))
 
 CFLAGS = -DANDROID -DSND_LIB_ANDROIDSOUND -O2 -g -Wno-format -fsigned-char -fPIC -I../include
 LFLAGS = -shared
@@ -485,7 +503,7 @@ GITINFO=1
 # (rather than just in suffix default rule), such as is implemented by
 # gnu make and others which have picked up its extensions;
 # allowed values are 0, 1, and empty (which behaves like 0)
-QUIETCC=0
+QUIETCC=1
 
 # ----------------------------------------
 #
@@ -513,7 +531,7 @@ ACTUAL_LINK := $(LINK)
 CC_V0 = $(ACTUAL_CC)
 CC_V = $(CC_V0)
 CC_V1 = @echo "[CC] $<"; $(ACTUAL_CC)
-CC = $(CC_V$(QUIETCC))
+# CC was hardcoded to clang++, disabling it to use TARGET_CC
 
 CXX_V0 = $(ACTUAL_CXX)
 CXX_V = $(CXX_V0)
@@ -789,11 +807,11 @@ $(LUALIB) ../include/nhlua.h:
 # special rules, to force update of makedefs, real dependencies should be
 # below in the 'make depend' output.
 monst.o:
-	$(CC) $(CFLAGS) $(CSTD) -c -o $@ monst.c
+	$(TARGET_CC) $(TARGET_CFLAGS) -c -o $@ monst.c
 	@rm -f $(MAKEDEFS)
 
 objects.o:
-	$(CC) $(CFLAGS) $(CSTD) -c -o $@ objects.c
+	$(TARGET_CC) $(TARGET_CFLAGS) -c -o $@ objects.c
 	@rm -f $(MAKEDEFS)
 
 # outdated Qt 3 windowport meta-object-compiler output
@@ -831,10 +849,10 @@ tile.c: ../win/share/tilemap.c $(HACK_H)
 #
 
 hacklib.a: hacklib.o
-	$(AR) $(ARFLAGS) $@ hacklib.o
+	$(TARGET_AR) $(TARGET_ARFLAGS) $@ hacklib.o
 
 $(TARGETPFX)hacklib.a: $(TARGETPFX)hacklib.o
-	$(AR) $(ARFLAGS) $@ $(TARGETPFX)hacklib.o
+	$(TARGET_AR) $(TARGET_ARFLAGS) $@ $(TARGETPFX)hacklib.o
 
 ../win/gnome/gn_rip.h: ../win/X11/rip.xpm
 	cp ../win/X11/rip.xpm ../win/gnome/gn_rip.h

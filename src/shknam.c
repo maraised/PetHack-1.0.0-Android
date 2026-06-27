@@ -128,7 +128,7 @@ static const char *const shktools[] = {
 #ifdef WIN32
     "Lexa", "Niod",
 #endif
-#ifdef MAC68K
+#ifdef MACOS9
     "Nhoj-lee", "Evad\'kh", "Ettaw-noj", "Tsew-mot", "Ydna-s", "Yao-hang",
     "Tonbar", "Kivenhoug", "Llardom",
 #endif
@@ -187,6 +187,19 @@ static const char *const shkhealthfoods[] = {
     "=Zennia",  "=Zoe",      "=Zora",    0
 };
 
+/* CHANGED 6/25/2026: Names for toy store shopkeepers */
+static const char *const shktoys[] = {
+    /* As Arrows Are */
+    "Antoinette",   "Olympe",   "Spallanzanne",    "Coppelia",    "Crispin",
+    "Nichola",      "Edmonde",  "Celia",           "Dagmar",      "Leandra",
+    "Marta",        "Holly",    "Simone",          "Marguerite",  "Vivienne", 
+    "Liadan",
+    
+    /* Other stories */
+    "Abigail",   "Bow",       "Rowan",        "Hazel",   "Courtney",
+    "Sabrina",   "Lysestar",  "Laochespada",  "Belle",   "Juliet",    0
+};
+
 /*
  * To add new shop types, all that is necessary is to edit the shtypes[]
  * array.  See mkroom.h for the structure definition.  Typically, you'll
@@ -209,7 +222,7 @@ static const char *const shkhealthfoods[] = {
 const struct shclass shtypes[] = {
     { "general store", NULL,
       RANDOM_CLASS,
-      42,
+      35,
       D_SHOP,
       { { 100, RANDOM_CLASS },
         { 0, 0 },
@@ -326,6 +339,18 @@ const struct shclass shtypes[] = {
         { 2, -SCR_FOOD_DETECTION },
         { 1, -LUMP_OF_ROYAL_JELLY } },
       shkhealthfoods },
+/* CHANGED 6/25/2026: New store: toy store (sells figurines) */
+    { "toy store", "toy shop",
+      TOOL_CLASS,
+      7,
+      D_SHOP,
+      { { 100, -FIGURINE },
+        { 0, 0 },
+        { 0, 0 },
+        { 0, 0 },
+        { 0, 0 },
+        { 0, 0 } },
+      shktoys },
     /* Shops below this point are "unique".  That is they must all have a
      * probability of zero.  They are only created via the special level
      * loader.
@@ -475,8 +500,20 @@ mkshobj_at(const struct shclass *shp, int sx, int sy, boolean mkspecl)
         atype = get_shop_item((int) (shp - shtypes));
         if (atype == VEGETARIAN_CLASS)
             mkveggy_at(sx, sy);
-        else if (atype < 0)
-            (void) mksobj_at(-atype, sx, sy, TRUE, TRUE);
+        else if (atype < 0) {
+            struct obj *otmp = mksobj_at(-atype, sx, sy, TRUE, TRUE);
+            /* Makes figurines completely random */
+            if (otmp && otmp->otyp == FIGURINE) {
+                int mndx;
+                do {
+                    mndx = rn1(NUMMONS - 1, 1);
+                } while ((mons[mndx].geno & G_UNIQ) ||
+                         (mons[mndx].mlet == S_HUMAN && !is_undead(&mons[mndx])));
+                
+                otmp->corpsenm = mndx;
+                blessorcurse(otmp, 4);
+            }
+        }
         else
             (void) mkobj_at(atype, sx, sy, TRUE);
     }

@@ -23,15 +23,15 @@
 #include "dlb.h"
 #include "hacklib.h"
 
-#ifdef MAC68K
+#ifdef MACOS9
 #if defined(__SC__) || defined(__MRC__) /* MPW compilers */
 #define MPWTOOL
 #include <CursorCtl.h>
 #include <string.h>
-#else /* MAC68K without MPWTOOL */
+#else /* MACOS9 without MPWTOOL */
 #define MACsansMPWTOOL
 #endif
-#endif /* MAC68K */
+#endif /* MACOS9 */
 
 #ifndef MPWTOOL
 #define SpinCursor(x)
@@ -78,7 +78,7 @@
 #define DGN_TEMPLATE "NH:dat/%s" /* where dungeon.pdf file goes */
 #endif /* OLD_MAKEDEFS_OPTIONS */
 #else /* not AMIGA */
-#if defined(MAC68K) && !defined(__MACH__)
+#if defined(MACOS9) && !defined(__MACH__)
 /* MacOS 9 or earlier */
 #define SOURCE_TEMPLATE ":src:%s"
 #if __SC__ || __MRC__
@@ -91,7 +91,7 @@
 #define INCLUDE_TEMPLATE ":include:%s"
 #define DGN_TEMPLATE ":dat:%s" /* where dungeon.pdf file goes */
 #endif /* OLD_MAKEDEFS_OPTIONS */
-#else /* neither AMIGA nor MAC68K */
+#else /* neither AMIGA nor MACOS9 */
 #ifdef OS2
 #define SOURCE_TEMPLATE "..\\src\\%s"
 #define DATA_TEMPLATE "..\\dat\\%s"
@@ -100,7 +100,7 @@
 #define INCLUDE_TEMPLATE "..\\include\\%s"
 #define DGN_TEMPLATE "..\\dat\\%s" /* where dungeon.pdf file goes */
 #endif /* OLD_MAKEDEFS_OPTIONS */
-#else /* not AMIGA, MAC68K, or OS2 */
+#else /* not AMIGA, MACOS9, or OS2 */
 #define SOURCE_TEMPLATE "../src/%s"
 #define DATA_TEMPLATE "../dat/%s"
 #define DATA_IN_TEMPLATE "../dat/%s"
@@ -109,7 +109,7 @@
 #define DGN_TEMPLATE "../dat/%s" /* where dungeon.pdf file goes */
 #endif /* OLD_MAKEDEFS_OPTIONS */
 #endif /* else !OS2 */
-#endif /* else !MAC68K */
+#endif /* else !MACOS9 */
 #endif /* else !AMIGA */
 
 static const char
@@ -257,7 +257,7 @@ main(void)
     return 0;
 }
 
-#else /* ! MAC68K */
+#else /* ! MACOS9 */
 
 DISABLE_WARNING_UNREACHABLE_CODE
 
@@ -1551,7 +1551,7 @@ do_oracles(void)
                 break;
             if (!(ok = (fscanf(ofp, "%5lx", &offset) == 1)))
                 break;
-#ifdef MAC68K
+#ifdef MACOS9
 #ifdef __MWERKS__
             /*
             MetroWerks CodeWarrior Pro 1's (AKA CW12) version of MSL
@@ -1876,14 +1876,14 @@ do_date(void)
     Fprintf(ofp, "#define COPYRIGHT_BANNER_C \\\n \"%s\"\n",
             bannerc_string(buf, sizeof buf, cbuf));
     if (get_gitinfo(githash, gitbranch)) {
-        Fprintf(ofp, "#define NETHACK_GIT_SHA \"%s\"\n", githash);
-        Fprintf(ofp, "#define NETHACK_GIT_BRANCH \"%s\"\n", gitbranch);
+        Fprintf(ofp, "#define PETHACK_GIT_SHA \"%s\"\n", githash);
+        Fprintf(ofp, "#define PETHACK_GIT_BRANCH \"%s\"\n", gitbranch);
     }
     if (xpref && get_gitinfo(githash, gitbranch)) {
         Fprintf(ofp, "#else /* !CROSSCOMPILE || !CROSSCOMPILE_TARGET */\n");
-        Fprintf(ofp, "#define NETHACK_%sGIT_SHA \"%s\"\n",
+        Fprintf(ofp, "#define PETHACK_%sGIT_SHA \"%s\"\n",
                 xpref, githash);
-        Fprintf(ofp, "#define NETHACK_%sGIT_BRANCH \"%s\"\n",
+        Fprintf(ofp, "#define PETHACK_%sGIT_BRANCH \"%s\"\n",
                 xpref, gitbranch);
     }
 #if !defined(CROSSCOMPILE) || !defined(CROSSCOMPILE_TARGET)
@@ -1895,7 +1895,7 @@ do_date(void)
         struct tm *tm = localtime((time_t *) &clocktim);
 
         Fprintf(ofp, "#define AMIGA_VERSION_STRING ");
-        Fprintf(ofp, "\"\\0$VER: NetHack %d.%d.%d (%d.%d.%d)\"\n",
+        Fprintf(ofp, "\"\\0$VER: PetHack %d.%d.%d (%d.%d.%d)\"\n",
                 VERSION_MAJOR, VERSION_MINOR, PATCHLEVEL,
                 tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900);
     }

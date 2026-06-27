@@ -182,36 +182,56 @@ make_familiar(struct obj *otmp, coordxy x, coordxy y, boolean quietly)
     if (is_pool(mtmp->mx, mtmp->my) && minliquid(mtmp))
         return (struct monst *) 0;
 
-    if (otmp) { /* figurine; resulting monster might not become a pet */
-        chance = rn2(10); /* 0==tame, 1==peaceful, 2==hostile */
-        if (chance > 2)
-            chance = otmp->blessed ? 0 : !otmp->cursed ? 1 : 2;
-        /* 0,1,2:  b=80%,10,10; nc=10%,80,10; c=10%,10,80 */
-        if (chance > 0) {
-            reallytame = FALSE; /* not tame after all */
-            if (chance == 2) {  /* hostile (cursed figurine) */
-                if (!quietly)
-                    You("get a bad feeling about this.");
-                mtmp->mpeaceful = 0;
-                set_malign(mtmp);
-            }
+    if (otmp) { 
+        chance = 0;
+        
+        /* CHANGED 6/23/26: Rebalanced figurine BUC effects:
+	Blessed: 100% tame
+	Uncursed: 10% tame, 70% peaceful, 20% hostile
+	Cursed: 0% tame, 10% peaceful, 90% hostile
+	I also made sure these effects actually work */
+        if (otmp->blessed) {
+            chance = 0;
+        } else if (!otmp->cursed) {
+            int roll = rn2(100);
+            if (roll < 10) chance = 0;
+            else if (roll < 80) chance = 1;
+            else chance = 2;
+        } else {
+            int roll = rn2(100);
+            if (roll < 10) chance = 1;
+            else chance = 2;
         }
-        /* if figurine has been named, give same name to the monster */
-        if (has_oname(otmp))
-            mtmp = christen_monst(mtmp, ONAME(otmp));
+
+        reallytame = (chance == 0) ? TRUE : FALSE;
+
+        if (chance == 2 && !quietly) {
+            You("get a bad feeling about this.");
+        }
     }
-    if (reallytame)
+
+    if (has_oname(otmp))
+        mtmp = christen_monst(mtmp, ONAME(otmp));
+
+    if (reallytame) {
         initedog(mtmp, TRUE);
+    } else {
+        if (chance == 1) {
+            mtmp->mpeaceful = 1;
+        } else if (chance == 2) {
+            mtmp->mpeaceful = 0;
+            set_malign(mtmp);
+        }
+    }
+
     mtmp->msleeping = 0;
-    set_malign(mtmp); /* more alignment changes */
+    set_malign(mtmp);
     newsym(mtmp->mx, mtmp->my);
 
-    /* must wield weapon immediately since pets will otherwise drop it */
     if (mtmp->mtame && attacktype(mtmp->data, AT_WEAP)) {
         mtmp->weapon_check = NEED_HTH_WEAPON;
         (void) mon_wield_item(mtmp);
     }
-    return mtmp;
 }
 
 /* despite rather general name, used exclusively for hero's starting pet */
@@ -463,10 +483,8 @@ mon_arrive(struct monst *mtmp, int when)
        here for monsters migrating to a newly created level */
     restore_cham(mtmp);
 
-    if (mtmp == u.usteed) {
-        mtmp->mstate &= ~MON_STILL_ARRIVING;
+    if (mtmp == u.usteed)
         return; /* don't place steed on the map */
-    }
     if (when == With_you) {
         /* When a monster accompanies you, sometimes it will arrive
            at your intended destination and you'll end up next to

@@ -1,3 +1,4 @@
+#define SAVEFILE_REVISION_LEVEL 1
 /* NetHack 5.0	revision.c	$NHDT-Date: 1779927286 2026/05/28 00:14:46 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.1 $ */
 /* Copyright (c) Michael Allison, 2026. */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -85,5 +86,7 @@ read_mystruct(struct mystruct *ms)
 }
 
 #endif  /* DEMO_UPLIFTS */
-
+#ifndef SAVEFILE_REVISION_LEVEL
+#define SAVEFILE_REVISION_LEVEL 1
+#endif
 /*revision.c*/
