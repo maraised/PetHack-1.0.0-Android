@@ -1,44 +1,21 @@
+PREMISE & NOTES
+PetHack is a simple variant geared towards pet lovers. It makes it easier to obtain and manage pets while still having the classic NetHack feel.
+PetHack is based on NetHack 5.0.0. This will likely be the only release of PetHack unless there are bugs. The goal was not to make extreme changes, but rather to upgrade and serve a specific playstyle.
+There is also an Android port of PetHack! It is based on JodiJodington and gurr’s Android ports for NetHack:
+I am very, very new to coding and GitHub. If there are any issues with the game or repository, please let me know and I will do my best to fix them!
 
-# Build instructions
-
-These instructions are written for a 64-bit Ubuntu installation.
-Modifying them for other linux distributions should be little to no
-work. If you're running Windows you're on your own.
-
-
-## Preparations
-
- - Download and extract Android SDK Command-line Tools [https://developer.android.com/studio/index.html#command-tools]()
- - Install JDK 8. Required by Android SDK manager (e.g. [https://adoptium.net/temurin/releases?version=8&os=any&arch=any](Temurin))
- - Install `bison` and `flex`. Used by the native nethack build.
- - Check out NetHack-Android: `git clone https://github.com/gurrhack/NetHack-Android.git`
- - Create an env variable called `ANDROID_SDK_ROOT` and point it to the android-sdk installation directory. Used by Gradle.
-
-### Install Android build tools
-
- 1. `cd /path/to/android-sdk/tools/bin`
- 2. Update the sdk manager: `./sdkmanager --update`. If you get "NoClassDefFoundError" it's because you're not running JDK 8. Make sure the env variable `JAVA_HOME` points to JDK 8.
- 3. Install the platform tools: `./sdkmanager --install "platforms;android-30"`
- 4. Install the NDK: `./sdkmanager --install "ndk;21.4.7075529"`
-
-
-## Build
-
-### Build the native nethack library
-
- 1. `cd /path/to/NetHack-Android/sys/android`
- 2. Open `Makefile.src` and change NDK to the appropriate path.
- 3. `sh ./setup.sh`
- 4. `cd ../..`
- 5. `make install`
-
-### Build the Android application
-
- 1. `cd /path/to/NetHack-Android/sys/android`
- 2. `./gradlew build`
- 3. `cd ./app/build/outputs/apk/debug`
- 4. Copy the APK file from this directory to your device.
- 5. On your device: locate the APK file, install it and run!
-
----
-Happy hacking!
+CHANGELOG
+Changed Tourist role
+They now start with 3-5 tripe rations, 3-5 scrolls of taming, a blessed spellbook of charm monster, a blessed magic whistle, a sack, a leash, and a blessed random figurine in addition to their original starting equipment
+The figurine is completely random, meaning it can be any monster (not based on level/depth) while still following normal figurine generation rules
+They now start with Basic in enchantment spells and can reach Expert
+Changed charm monster back to a level 3 spell
+If you throw an item to an intelligent pet with hands, they will catch it and equip it if applicable. They will prioritize using items you give them over other items. This idea came from FIQHack.
+Intelligent pets will now hoard healing potions even when they're healthy. Be careful to manage this properly!
+Rebalanced figurine BUC effects
+Blessed: 100% tame
+Uncursed: 10% tame, 70% peaceful, 20% hostile
+Cursed: 0% tame, 10% peaceful, 90% hostile
+New store: Toy store
+This is a shop that only sells figurines. Figurines that generate in toy stores (or shops in general) can also be of any monster regardless of the player’s level and depth.
+Figurine base prices now scale with the monster’s difficulty (difficulty x 50). For example, figurines of Archons will be expensive, while figurines of lichens will be cheap.
