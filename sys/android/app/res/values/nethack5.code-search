@@ -1,0 +1,9 @@
+# Query: nethack5
+# ContextLines: 1
+
+1 result - 1 file
+
+sys/android/app/res/values/config.xml:
+  2  <resources>
+  3: 	<string name="namespace">com.tbd.PetHack</string>
+  4  	<string name="oldActivityName">NetHack</string>
